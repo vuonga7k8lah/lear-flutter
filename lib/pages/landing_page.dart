@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:my_app/pages/home_page.dart';
 import 'package:my_app/values/app_colors.dart';
 import 'package:my_app/values/app_styles.dart';
@@ -50,7 +52,8 @@ class LandingPage extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 72),
               child: RawMaterialButton(
                 onPressed: (){
-                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>HomePage()), (route) => false);
+                  Get.offAll(HomePage());
+                  //Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>HomePage()), (route) => false);
                 },
                child: const Icon(Icons.arrow_forward_ios_rounded),
                 fillColor: Colors.grey,

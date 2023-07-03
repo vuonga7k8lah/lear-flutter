@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/values/app_styles.dart';
+import 'package:get_storage/get_storage.dart';
 
 class ControlPage extends StatefulWidget {
   const ControlPage({super.key});
@@ -10,7 +11,12 @@ class ControlPage extends StatefulWidget {
 }
 
 class _ControlPageState extends State<ControlPage> {
+  var storage = GetStorage();
   double valueSide = 5;
+
+  _ControlPageState(){
+    valueSide = storage.read('numberWord')??valueSide;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +26,7 @@ class _ControlPageState extends State<ControlPage> {
         leading: IconButton(
             onPressed: () {
               Navigator.pop(context);
+              storage.write('numberWord', valueSide);
             },
             icon: Icon(Icons.arrow_back_ios_new_rounded)),
       ),

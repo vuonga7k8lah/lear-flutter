@@ -3,7 +3,9 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:my_app/pages/controll_page.dart';
+import 'package:my_app/pages/form_page.dart';
 import 'package:my_app/values/app_styles.dart';
 import 'package:my_app/widgets/app_button.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -22,6 +24,9 @@ class _HomePageState extends State<HomePage> {
   final controller = PageController(viewportFraction: 1, keepPage: true);
   late List<EnglishToday> data = [];
   final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
+  var numberWord = 5;
+  var storage = GetStorage();
+
 
   List<String> handleRandomWord(int limit) {
     List<String> data = [];
@@ -34,7 +39,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   handleGetData() {
-    return handleRandomWord(10)
+    return handleRandomWord(numberWord)
         .map((e) => EnglishToday(
             text: e,
             id: UniqueKey().toString(),
@@ -42,10 +47,14 @@ class _HomePageState extends State<HomePage> {
                 'thanks, i know, I will make an additional check the list of existing uuids'))
         .toList();
   }
-
+ handleReloadConfig(){
+   var numberConvert = storage.read('numberWord').toInt();
+   numberWord= numberConvert??numberWord;
+ }
   @override
   void initState() {
     // TODO: implement initState
+    handleReloadConfig();
     data = handleGetData();
     super.initState();
   }
@@ -61,7 +70,10 @@ class _HomePageState extends State<HomePage> {
             IconButton(onPressed: () {
               _scaffoldkey.currentState?.openDrawer();
             }, icon: Icon(Icons.reorder_rounded)),
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.add_ic_call))],
+        actions: [IconButton(onPressed: () {
+
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>FormPage()), (route) => false);
+        }, icon: Icon(Icons.add_ic_call))],
       ),
       body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -82,7 +94,7 @@ class _HomePageState extends State<HomePage> {
             Container(
               height: size.height * 2 / 3,
               child: PageView.builder(
-                itemCount: 10,
+                itemCount: numberWord,
                 controller: controller,
                 itemBuilder: (context, index) {
                   var firstText =
@@ -145,7 +157,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             SmoothPageIndicator(
-              count: 5,
+              count: numberWord,
               effect: const ScrollingDotsEffect(
                 activeStrokeWidth: 2.6,
                 activeDotScale: 1.3,
@@ -164,6 +176,7 @@ class _HomePageState extends State<HomePage> {
         onPressed: () {
           setState(() {
             data = handleGetData();
+            handleReloadConfig();
           });
         },
         child: Icon(Icons.restart_alt_outlined),
