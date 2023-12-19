@@ -1,228 +1,217 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:my_app/pages/blogs/list_blog.dart';
 
-
-import 'Binding/BlogBinding.dart';
-import 'Binding/MainBinding.dart';
-
-Future<void> main() async {
-  await MainBinding().dependencies();
-  runApp(GetMaterialApp(
-    debugShowCheckedModeBanner: false,
-    initialRoute: '/home',
-    defaultTransition: Transition.fade,
-    getPages: [
-      GetPage(
-        name: '/home',
-        page: () => HomePage(),
-        binding: HomeBinding(),
-      ),
-      GetPage(
-        name: '/another',
-        page: () => AnotherPage(),
-      ),
-    ],
-  ));
+void main() {
+  runApp(MyApp());
 }
 
-class HomeBinding extends Bindings {
-  @override
-  void dependencies() {
-    Get.lazyPut(() => HomeController());
-  }
-}
-
-class HomeController extends GetxController {
-  static HomeController get to => Get.find();
-
-  var currentIndex = 0.obs;
-
-  final pages = <String>['/browse', '/history', '/settings','/form'];
-
-  void changePage(int index) {
-    currentIndex.value = index;
-    Get.toNamed(pages[index], id: 1);
-  }
-
-  Route? onGenerateRoute(RouteSettings settings) {
-    if (settings.name == '/browse')
-      return GetPageRoute(
-        settings: settings,
-        page: () => BrowsePage(),
-        binding: BrowseBinding(),
-      );
-
-    if (settings.name == '/history')
-      return GetPageRoute(
-        settings: settings,
-        page: () => HistoryPage(),
-        binding: HistoryBinding(),
-      );
-
-    if (settings.name == '/settings')
-      return GetPageRoute(
-        settings: settings,
-        page: () => SettingsPage(),
-        binding: SettingsBinding(),
-      );
-
-    if (settings.name == '/form')
-      return GetPageRoute(
-        settings: settings,
-        page: () => ListBlog(),
-        binding: BlogBinding(),
-      );
-    return null;
-  }
-}
-
-class HomePage extends GetView<HomeController> {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Navigator(
-        key: Get.nestedKey(1),
-        initialRoute: '/browse',
-        onGenerateRoute: controller.onGenerateRoute,
-      ),
-      bottomNavigationBar: Obx(
-            () => BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: 'Browse',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.history),
-              label: 'History',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.fact_check_outlined),
-              label: 'Form',
-            ),
-          ],
-          currentIndex: controller.currentIndex.value,
-          showSelectedLabels: false,
-          selectedIconTheme: const IconThemeData(
-            color: Colors.pink,
-            opacity: 1.0,
-            size: 45
-          ),
-          unselectedIconTheme: const IconThemeData(
-              color: Colors.black45,
-              opacity: 0.5,
-              size: 25
-          ),
-          onTap: controller.changePage,
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Fill in the Blank'),
+        ),
+        body: Center(
+          child: FillInTheBlankText(),
         ),
       ),
     );
   }
 }
 
-class BrowsePage extends StatelessWidget {
+class FillInTheBlankText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Browse')),
-      body: Center(
-        child: Container(
-          child: Text(Get.find<BrowseController>().title.value),
-        ),
-      ),
-    );
-  }
-}
+    // Danh sách các từ bạn muốn điền vào chỗ trống
+    List<String> blanks = ['world', 'Flutter', 'awesome'];
 
-class HistoryPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('History')),
-      body: Center(
-        child: Container(
-          child: Text(Get.find<HistoryController>().title.value),
-        ),
-      ),
-    );
-  }
-}
+    // Chuỗi với chỗ trống được đánh dấu bằng "__"
+    String textWithBlanks = 'Hello, __! Welcome to __. Flutter is __!';
 
-class SettingsPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Settings')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              child: Text(Get.find<SettingsController>().title.value),
+    // Tách chuỗi thành các phần có chỗ trống và không có chỗ trống
+    List<String> parts = textWithBlanks.split('__');
+
+    // Tạo danh sách các TextSpan
+    List<InlineSpan> spans = List.generate(
+      parts.length,
+          (index) {
+        if (index % 2 == 0) {
+          // Phần không có chỗ trống
+          return TextSpan(
+            text: parts[index],
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 16.0,
             ),
-            ElevatedButton(
-              child: Text('Another Page'),
-              onPressed: () => Get.toNamed('/another'),
+          );
+        } else {
+          //Phần có chỗ trống
+          return TextSpan(
+            text: blanks[index ~/ 2], // Chọn từ tương ứng trong danh sách
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 16.0,
+              fontWeight: FontWeight.bold,
             ),
-          ],
-        ),
+          );
+
+        }
+      },
+    );
+
+    return RichText(
+      text: TextSpan(
+        children: spans,
       ),
     );
   }
 }
-
-class BrowseController extends GetxController {
-  final title = 'Browser'.obs;
-}
-
-class HistoryController extends GetxController {
-  final title = 'History'.obs;
-}
-
-class SettingsController extends GetxController {
-  final title = 'Settings'.obs;
-}
-
-class FormController extends GetxController {
-  final title = 'Form'.obs;
-}
-
-class BrowseBinding extends Bindings {
-  @override
-  void dependencies() {
-    Get.lazyPut(() => BrowseController());
-  }
-}
-
-class HistoryBinding extends Bindings {
-  @override
-  void dependencies() {
-    Get.lazyPut(() => HistoryController());
-  }
-}
-
-class SettingsBinding extends Bindings {
-  @override
-  void dependencies() {
-    Get.lazyPut(() => SettingsController());
-  }
-}
-class FormBinding extends Bindings {
-  @override
-  void dependencies() {
-    Get.lazyPut(() => FormController());
-  }
-}
-
-class AnotherPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: Text('Another Page')), body: Container());
-  }
-}
+// import 'package:flutter/material.dart';
+// import 'package:flutter/cupertino.dart';
+// import 'package:flutter/material.dart';
+// void main() {
+//   runApp(MyApp());
+// }
+//
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: Scaffold(
+//         appBar: AppBar(
+//           title: Text('Fill in the Blank'),
+//         ),
+//         body: FillInBlankWidget(question: 'How much does Education WordPress Theme cost?', answer: '', onSubmit: (){
+//
+//         },),
+//       ),
+//     );
+//   }
+// }
+// //
+// // class FillInTheBlank extends StatefulWidget {
+// //   @override
+// //   _FillInTheBlankState createState() => _FillInTheBlankState();
+// // }
+// //
+// // class _FillInTheBlankState extends State<FillInTheBlank> {
+// //   TextEditingController _textController = TextEditingController();
+// //   String sentence = 'I enjoy [your activity] in my free time.';
+// //
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     return Padding(
+// //       padding: const EdgeInsets.all(16.0),
+// //       child: Column(
+// //         children: [
+// //           Text(
+// //             sentence,
+// //             style: TextStyle(fontSize: 18.0),
+// //           ),
+// //           SizedBox(height: 16.0),
+// //           SecretWord(sentence),
+// //         ],
+// //       ),
+// //     );
+// //   }
+// // }
+// // class SecretWord extends StatelessWidget {
+// //   final String answer;
+// //
+// //   SecretWord(this.answer);
+// //
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     String value = "";
+// //     int answerLength = answer.length;
+// //     String answerHint = '.' * answerLength;
+// //     double answerWidth = answerLength * 15.0;
+// //
+// //     return Container(
+// //       width: answerWidth,
+// //       height: null,
+// //       child: TextFormField(
+// //         maxLines: null,
+// //         cursorColor: Colors.cyanAccent,
+// //         cursorRadius: Radius.circular(12.0),
+// //         cursorWidth: 2.0,
+// //         style: TextStyle(
+// //           color:
+// //           (value == answer) ? Colors.amberAccent : Colors.lightGreenAccent,
+// //           fontWeight: FontWeight.bold,
+// //           fontSize: 20,
+// //           letterSpacing: 3,
+// //         ),
+// //         autofocus: false,
+// //         maxLength: answerLength,
+// //         onChanged: (text) {
+// //           value = text;
+// //         },
+// //         decoration: InputDecoration(
+// //           isDense: true,
+// //           contentPadding: const EdgeInsets.symmetric(vertical: -5),
+// //           counterText: '',
+// //           border: InputBorder.none,
+// //           focusedBorder: InputBorder.none,
+// //           enabledBorder: InputBorder.none,
+// //           errorBorder: InputBorder.none,
+// //           disabledBorder: InputBorder.none,
+// //           hintText: answerHint,
+// //           hintStyle: TextStyle(
+// //             color: Colors.lightGreenAccent,
+// //             fontWeight: FontWeight.bold,
+// //             letterSpacing: 4,
+// //           ),
+// //         ),
+// //       ),
+// //     );
+// //   }
+// // }
+//
+//
+// class FillInBlankWidget extends StatefulWidget {
+//   final String question;
+//   final String answer;
+//   final Function onSubmit;
+//
+//   FillInBlankWidget({
+//     required this.question,
+//     required this.answer,
+//     required this.onSubmit,
+//   });
+//
+//   @override
+//   State<FillInBlankWidget> createState() => _FillInBlankWidgetState();
+// }
+//
+// class _FillInBlankWidgetState extends State<FillInBlankWidget> {
+//   String _answer = "";
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       child: Column(
+//         children: [
+//           Text(widget.question),
+//           TextField(
+//             decoration: InputDecoration(
+//               hintText: widget.answer,
+//             ),
+//             onChanged: (text) {
+//               setState(() {
+//                 _answer = text;
+//               });
+//             },
+//           ),
+//           GestureDetector(
+//             onTap: () {
+//               widget.onSubmit(_answer);
+//             },
+//             child: Text("Xác nhận"),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
